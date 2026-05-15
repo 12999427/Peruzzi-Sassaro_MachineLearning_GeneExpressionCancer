@@ -1,0 +1,6 @@
+{
+    "ari": 0.7969795067048849,
+    "nmi": 0.8577921445029066,
+    "silhouette": 0.1545431405438555,
+    "model_path": "models\\kmeans.joblib"
+}

@@ -1,0 +1,9 @@
+{
+    "accuracy": 0.8819875776397516,
+    "params": {
+        "max_depth": 10,
+        "min_samples_split": 5,
+        "n_estimators": 300
+    },
+    "model_path": "models\\random_forest.joblib"
+}

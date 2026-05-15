@@ -1,0 +1,8 @@
+{
+    "accuracy": 1.0,
+    "params": {
+        "C": 0.1,
+        "solver": "lbfgs"
+    },
+    "model_path": "models\\logistic_regression.joblib"
+}

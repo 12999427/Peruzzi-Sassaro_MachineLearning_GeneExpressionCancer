@@ -1,0 +1,8 @@
+{
+    "accuracy": 0.9937888198757764,
+    "params": {
+        "C": 0.1,
+        "kernel": "linear"
+    },
+    "model_path": "models\\svm.joblib"
+}

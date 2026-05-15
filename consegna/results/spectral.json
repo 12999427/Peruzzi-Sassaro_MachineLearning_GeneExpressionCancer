@@ -1,0 +1,6 @@
+{
+    "ari": 0.9831573090628389,
+    "nmi": 0.9755309661379894,
+    "silhouette": 0.15597226959520177,
+    "model_path": "models\\spectral.joblib"
+}

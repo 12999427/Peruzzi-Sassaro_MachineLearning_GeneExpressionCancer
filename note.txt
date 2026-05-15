@@ -1,0 +1,2 @@
+https://www.geeksforgeeks.org/python/data-normalization-with-pandas/
+https://medium.com/@tubelwj/pandas-data-preprcoessing-data-normalization-de66c487288d
