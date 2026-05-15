@@ -5,31 +5,24 @@ from sklearn.decomposition import PCA
 
 class GenePreprocessor:
     def __init__(self, variance_threshold=0.1, n_components=0.95, seed=42):
-        self.vt = VarianceThreshold(threshold=variance_threshold)
-        self.scaler = StandardScaler()
-        self.pca = PCA(n_components=n_components, random_state=seed)
-        self.le = LabelEncoder()
+        self.vt = VarianceThreshold(threshold=variance_threshold) #colonne togli/agiungi
+        self.scaler = StandardScaler() # prende i valori di ogni gene e li trasforma in modo che nella colonna abbiano media = 0 e deviazione standard = 1 - i valorei dicentano piccoli e comparabili tra loro
+        self.pca = PCA(n_components=n_components, random_state=seed) # comprime le dimensioni, creandone nuove che rappresentano più significativamente
+        self.le = LabelEncoder() # da etichette a indici dei gruppi
         self.seed = seed
 
-    def fit_transform(self, X, y=None):
-        """
-        Applica la pipeline completa: VarianceThreshold -> Scaling -> PCA.
-        Se y è fornito, applica anche LabelEncoder.
-        """
+    def fit_transform(self, X, y=None): #applica la pipeline completa, fittando, ovvero calcolando i parametri necessari - lo si fa in training
         X_vt = self.vt.fit_transform(X)
         X_scaled = self.scaler.fit_transform(X_vt)
         X_pca = self.pca.fit_transform(X_scaled)
         
         if y is not None:
-            y_enc = self.le.fit_transform(y)
+            y_enc = self.le.fit_transform(y) #
             return X_pca, y_enc
         
         return X_pca
 
-    def transform(self, X, y=None):
-        """
-        Applica le trasformazioni già fittate.
-        """
+    def transform(self, X, y=None): # applica la pipeline su dati da testare
         X_vt = self.vt.transform(X)
         X_scaled = self.scaler.transform(X_vt)
         X_pca = self.pca.transform(X_scaled)

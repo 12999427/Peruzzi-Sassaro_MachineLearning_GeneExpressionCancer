@@ -3,21 +3,16 @@ import seaborn as sns
 import numpy as np
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from mpl_toolkits.mplot3d import Axes3D
+import pandas as pd
 
-def plot_expression_distribution(X, n_genes=50):
-    """
-    Mostra la distribuzione dei valori di espressione per un campione di geni.
-    """
-    plt.figure(figsize=(12, 6))
-    # Prendiamo un campione casuale di geni se sono troppi
-    sample_indices = np.random.choice(X.shape[1], min(n_genes, X.shape[1]), replace=False)
-    X_sample = X.iloc[:, sample_indices] if hasattr(X, 'iloc') else X[:, sample_indices]
-    
-    sns.boxplot(data=X_sample)
-    plt.title(f"Distribuzione dei valori di espressione ({n_genes} geni a campione)")
-    plt.xticks([]) # Nascondiamo i nomi dei geni se sono troppi
-    plt.ylabel("Valore Espressione")
-    plt.show()
+"""
+UMAP è spesso molto più bello da vedere perché crea cluster più netti e separati. Tuttavia, non
+sostituisce la PCA per diversi motivi tecnici e pratici - PCA rimane lo standard per
+il preprocessing:
+
+PCA è Lineare, UMAP è Non-Lineare: PCA cerca di "ruotare" e "schiacciare" i dati mantenendo le
+distanze originali in modo lineare. UMAP invece può creare cluster più distinguibili perchè "piega" lo spazio
+"""
 
 def plot_pca_2d(X_pca, y, le_classes, title="PCA 2D"):
     plt.figure(figsize=(10, 7))
@@ -26,14 +21,14 @@ def plot_pca_2d(X_pca, y, le_classes, title="PCA 2D"):
         mask = (y == cls_idx)
         plt.scatter(X_pca[mask, 0], X_pca[mask, 1], label=le_classes[cls_idx], alpha=0.7)
     plt.title(title)
-    plt.xlabel("PC1")
+    plt.xlabel("PC1") #Principal Component 1
     plt.ylabel("PC2")
     plt.legend(title="Tumori")
     plt.show()
 
 def plot_pca_3d(X_pca, y, le_classes, title="PCA 3D"):
     fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection='3d') #significa 1 riga, 1 colonna, (1) primo subplot (unico), grafico 3d
     unique_classes = np.unique(y)
     for cls_idx in unique_classes:
         mask = (y == cls_idx)
@@ -59,7 +54,7 @@ def plot_umap_2d(X_umap, y, le_classes, title="UMAP 2D"):
 
 def plot_umap_3d(X_umap, y, le_classes, title="UMAP 3D"):
     fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection='3d') 
     unique_classes = np.unique(y)
     for cls_idx in unique_classes:
         mask = (y == cls_idx)
@@ -72,9 +67,8 @@ def plot_umap_3d(X_umap, y, le_classes, title="UMAP 3D"):
     plt.show()
 
 def plot_cluster_comparison(X_pca, y_true, y_pred, le_classes, model_name=""):
-    """
-    Grafico a due pannelli: Classi Reali vs Cluster Calcolati.
-    """
+    # Grafico a due pannelli: Classi Reali vs Cluster Calcolati.
+
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
     # Plot Classi Reali
@@ -95,13 +89,10 @@ def plot_cluster_comparison(X_pca, y_true, y_pred, le_classes, model_name=""):
     plt.show()
 
 def plot_cluster_comparison_3d(X_pca, y_true, y_pred, le_classes, model_name=""):
-    """
-    Grafico 3D a due pannelli: Classi Reali vs Cluster Calcolati.
-    """
     fig = plt.figure(figsize=(18, 8))
     
     # Classi Reali
-    ax1 = fig.add_subplot(121, projection='3d')
+    ax1 = fig.add_subplot(121, projection='3d') # 1 riga, 2 colonne, primo subplot
     unique_classes = np.unique(y_true)
     for cls_idx in unique_classes:
         mask = (y_true == cls_idx)
@@ -110,30 +101,25 @@ def plot_cluster_comparison_3d(X_pca, y_true, y_pred, le_classes, model_name="")
     ax1.legend(title="Tumori")
 
     # Cluster Calcolati
-    ax2 = fig.add_subplot(122, projection='3d')
+    ax2 = fig.add_subplot(122, projection='3d') # secondo subplot colonna
     scatter2 = ax2.scatter(X_pca[:, 0], X_pca[:, 1], X_pca[:, 2], c=y_pred, cmap='Set2', alpha=0.7)
     ax2.set_title(f"Cluster Trovati ({model_name})")
     ax2.legend(*scatter2.legend_elements(), title="Cluster ID")
 
-    plt.tight_layout()
+    plt.tight_layout() #regola margini
     plt.show()
 
 def plot_confusion_matrix(y_true, y_pred, classes, title="Confusion Matrix"):
     cm = confusion_matrix(y_true, y_pred)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
     fig, ax = plt.subplots(figsize=(8, 6))
-    disp.plot(ax=ax, cmap='Blues', values_format='d')
+    disp.plot(ax=ax, cmap='Blues', values_format='d') #d per interi
     plt.title(title)
     plt.show()
 
-def plot_contingency_matrix(y_true, y_pred, le_classes, title="Matrice di Contingenza (Classi vs Cluster)"):
-    """
-    Mostra una heatmap che mette in relazione le classi reali con i cluster trovati.
-    Utile per capire quale cluster corrisponde a quale tumore.
-    """
-    import pandas as pd
-    data = pd.DataFrame({'Real': [le_classes[i] for i in y_true], 'Cluster': y_pred})
-    contingency = pd.crosstab(data['Real'], data['Cluster'])
+def plot_contingency_matrix(y_true, y_pred, le_classes, title="Matrice di Contingenza (Classi vs Cluster)"): # per unsuperv
+    data = pd.DataFrame({'Real': [le_classes[i] for i in y_true], 'Cluster': y_pred}) #tabella dove mette fianco a fianco il nome reale della malattia e il id del cluster calcolato
+    contingency = pd.crosstab(data['Real'], data['Cluster']) # mette sti 2 dati come riga e colonna, mette il num di ripetizioni per gli incroci
     
     plt.figure(figsize=(10, 7))
     sns.heatmap(contingency, annot=True, fmt='d', cmap='YlGnBu')
@@ -142,6 +128,7 @@ def plot_contingency_matrix(y_true, y_pred, le_classes, title="Matrice di Contin
     plt.xlabel("ID Cluster Calcolato")
     plt.show()
 
+#grafico della linea con tutti i punti (file 01) e retta della varianza filtrata
 def plot_pca_variance(pca):
     exp_var = np.cumsum(pca.explained_variance_ratio_)
     plt.figure(figsize=(8, 5))
