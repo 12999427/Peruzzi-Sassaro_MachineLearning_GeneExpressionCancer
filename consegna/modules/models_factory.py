@@ -10,20 +10,29 @@ from sklearn.model_selection import GridSearchCV
 def get_supervised_model(name, seed=42): # i parametri sono di base, poi sotto li tuna
     models = {
         'random_forest': RandomForestClassifier(
+            #300 alberi decisionali, 10=profondità di ogni albero, 5=numero minimo di pazienti x far dividere un nodo in 2 sottorami
+            #class_weight=da importanza in egual modo a tutte le classi anche a quelle con meno dati
+            #n_jobs=usa tutti i core
             n_estimators=300, max_depth=10, min_samples_split=5, 
             class_weight='balanced', random_state=seed, n_jobs=-1 #n_jobs=-1 per usare tutti i core disponibili, class_weight='balanced' per bilanciare le classi in caso di una sovrerappresentazione di una classe rispetto all'altra
         ),
         'svm': SVC(
+            #C=10=regolarizzazione->molto severo con errori durante allenamento->più dispendioso
+            #kernel='rbf'=funzione non lineare per mappare non con retta ma con altri elementi geometrici
+            #probability controlla anche la prob e non solo t/f
             C=10, kernel='rbf', probability=True, #ovvero non usare vero/falso per classificare, ma un flot di probabilità
             class_weight='balanced', random_state=seed
         ),
         'logistic_regression': LogisticRegression(
+            #C bassa per evitare overfitting, quindi molto libero
+            #riprova per 1000 tentativi per creare sigmode che sia "perfetta" per il dataset
             C=1.0, max_iter=1000, class_weight='balanced', random_state=seed
         )
     }
     return models.get(name)
 
 def tune_hyperparameters(name, X, y, seed=42): # tuning con GridSearchCV per trovare i parametri migliori.
+    #si occupa di trovare i parametri migliori rispetto a un dato alg
     param_grids = {
         'random_forest': {
             'n_estimators': [100, 300], #numero di alberi nella foresta
@@ -41,11 +50,16 @@ def tune_hyperparameters(name, X, y, seed=42): # tuning con GridSearchCV per tro
     }
     
     base_model = get_supervised_model(name, seed=seed) #modello base
+
+    #bae model serve per avere una base da cui clonare il modello da testare con i diversi params (poi da confrontare tra loro)
+    #confronto modello base e modello con tutte le possibili combinazioni di params, cv3=particolare modo di dividere i dati x cercare di sviluppare/allenare modello e confrontarlo con quello base
+    #scoring=... =modo x giudicare quale combinazione di params è la migliore
     grid_search = GridSearchCV(base_model, param_grids[name], cv=3, scoring='accuracy', n_jobs=-1) #prova tutte le combinazioni specificate. Effettua cross validation per verificare i risultati
     
-    #ora i parametri sono ottimali, lo allena qui
+    #ora i parametri sono ottimali, lo allena qui e li testa
     grid_search.fit(X, y)
-    
+
+    #returna il modello migliore e già allenato, con i relativi migliori parametri
     return grid_search.best_estimator_, grid_search.best_params_
 
 def get_unsupervised_model(name, n_clusters=5, seed=42):
@@ -58,19 +72,21 @@ def get_unsupervised_model(name, n_clusters=5, seed=42):
     }
     return models.get(name)
 
+
+
 def save_model(model, name, folder='models'):
     if not os.path.exists(folder):
         os.makedirs(folder)
     path = os.path.join(folder, f"{name}.joblib")
-    joblib.dump(model, path)
-    return path
+    joblib.dump(model, path)    #prende oggetto del modello e scrive sul disco
+    return path    #ritorna il percorso
 
-def save_results(results, name, folder='results'):
+def save_results(results, name, folder='results'):    #idem con cartella results
     if not os.path.exists(folder):
         os.makedirs(folder)
     path = os.path.join(folder, f"{name}.json")
-    with open(path, 'w') as f:
-        json.dump(results, f, indent=4)
+    with open(path, 'w') as f:    #dentro a questo scope apre il file in mod scrittura
+        json.dump(results, f, indent=4)    #dizionario dati e scrive nel file, con un tab di indentazione
     return path
 
 """
