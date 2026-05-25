@@ -11,6 +11,8 @@ class GenePreprocessor:
         self.le = LabelEncoder() # da etichette a indici dei gruppi
         self.seed = seed
 
+
+    #c'è uno studio dei calcoli della varianza, e dopo applicata, e così anche per altri fattori matematici
     def fit_transform(self, X, y=None): #applica la pipeline completa, fittando, ovvero calcolando i parametri necessari - lo si fa in training
         X_vt = self.vt.fit_transform(X)
         X_scaled = self.scaler.fit_transform(X_vt)
@@ -22,6 +24,11 @@ class GenePreprocessor:
         
         return X_pca
 
+
+    #applica la trasformazione anche ai nuovi/futuri dati o a quelli da testare
+    #qua non c'è fit perchè usa i valori calcolati durante la fase di training (e conservati negli oggetto dichiarati nel costruttore)
+    #per applicarli nei nuovi dati
+    #in modo tale da valutare le stesse colonne e stessi tipi di dati, normalizzati alla stessa maniera ecc
     def transform(self, X, y=None): # applica la pipeline su dati da testare
         X_vt = self.vt.transform(X)
         X_scaled = self.scaler.transform(X_vt)
